@@ -1,0 +1,60 @@
+#!/bin/bash
+while getopts 'deaxpfnC' flag
+do
+	case $flag in
+	d)
+		dpkg=1
+		;;
+	e)
+		ex=1
+		;;
+	a)
+		abs=1
+		;;
+	x)
+		regex="-x"
+		;;
+	f)
+		filter="cut -d ' ' -f2"
+		;;
+	p)
+		filter="cut -d: -f1"
+		;;
+	n)
+		filter="tr -d ':'"
+		;;
+	C)
+		nocolor=1
+		;;
+
+	esac	
+
+done
+shift $((OPTIND - 1))
+file=$1
+if [ "$dpkg" = "1" ]; then
+	cmd="dpkg -S"
+else
+	cmd="apt-file search"
+fi
+
+if [ "$ex" = "1" ]; then
+	file=$(readlink -f $(which $file))
+	abs=1
+fi
+
+if [ "$abs" = "1" ] && [ "$dpkg" != "1" ]; then
+	absfile="^${file}\$"
+	regex="-x"
+else
+	absfile=$file
+fi
+if [ -z "$filter" ]; then
+	filter=cat
+fi
+
+if [ "$nocolor" != "1" ]; then
+	filter="$filter | egrep --color '$file|'$"
+fi
+
+eval "$cmd $regex '$absfile' | $filter"
