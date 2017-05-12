@@ -1,0 +1,14 @@
+#!/bin/bash
+randomname() {
+curl -sL "http://dynamic.xkcd.com/random/comic/" \
+    | grep "//imgs.xkcd.com/comics/"\
+    | awk -Fsrc=\" '{print $2}'\
+    |awk -F\" '{print $1}'
+}
+
+path=$(randomname)
+name=$(basename $path)
+wget https:$path
+
+convert $name $name.jpg
+rm $name

@@ -1,0 +1,20 @@
+#!/bin/bash
+set -vx
+
+dosed() {
+  ag -Ql "$1" | while read file; do sed -e "s/$1/$2/g" -i $file; done
+  find . -name "$1.cpp" | while read file; do git mv $file $(echo $file | sed -e "s/$1/$2/g"); done
+  find . -name "$1.h" | while read file; do git mv $file $(echo $file | sed -e "s/$1/$2/g"); done
+}
+
+up() {
+  echo $1 | awk '{print toupper($0)}'
+}
+
+down() {
+  echo $1 | awk '{print tolower($0)}'
+}
+
+dosed $1 $2
+dosed $(up $1) $(up $2)
+dosed $(down $1) $(down $2)
